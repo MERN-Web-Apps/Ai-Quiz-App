@@ -39,7 +39,8 @@ function Signin() {
 
   return (
     <div>
-      <h2>Sign In Page</h2>
+      <h2>SignIn Page</h2>
+      <h4>Don't have an Account? <span style={{cursor: 'pointer', color: 'blue', textDecoration: 'underline'}} onClick={() => (window.location.href = '/signup')}>Sign Up</span></h4>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', maxWidth: 300 }}>
         <input
           type="email"
@@ -57,7 +58,7 @@ function Signin() {
           onChange={handleChange}
           required
         />
-        <button type="submit">Sign In</button>
+        <button type="submit" style={{cursor: 'pointer' }}>Sign In</button>
       </form>
       {message && <p>{message}</p>}
     </div>

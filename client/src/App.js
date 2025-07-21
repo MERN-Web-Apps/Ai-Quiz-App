@@ -5,14 +5,7 @@ import Signup from './pages/Signup';
 import Navbar from './components/Navbar';
 import Signin from './pages/Signin';
 import Profile from './pages/Profile';
-
-function Home() {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 100 }}>
-      <h1>Welcome to the Quiz App</h1>
-    </div>
-  );
-}
+import Home from './pages/Home';
 
 function App() {
 

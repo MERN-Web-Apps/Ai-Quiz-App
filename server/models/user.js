@@ -9,7 +9,11 @@ const userSchema = new Schema({
   password: { type: String, required: true },
   profileImage: { type: String, default: '/imgs/default.jpg' },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
-
+  quizzes: [{
+    quiz: { type: Schema.Types.ObjectId, ref: 'Quiz' },
+    rank: { type: Number },
+    date: { type: Date, default: Date.now }
+  }]
 }, { timestamps: true });
 
 userSchema.pre('save', function(next) {

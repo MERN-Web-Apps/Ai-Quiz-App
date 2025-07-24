@@ -27,7 +27,7 @@ mongoose.connect(MONGODB_URI).then(() => {
 app.use("/user", userRoutes);
 app.use("/profile", profileRoutes);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
   console.log(`Server is running on port http://localhost:${PORT}`);

@@ -6,12 +6,28 @@ router.get('/me', authMiddleware("token"), (req, res) => {
   res.json(req.user);
 });
 router.post('/signup', async(req, res) => {
-  const {username, email, password} = req.body;
-  const user = await User.create({username, email, password});
-  res.status(201).json({message: 'User created', user});
+  try {
+    const {username, email, password} = req.body;
+    
+    // Check for required fields
+    if (!username || !email || !password) {
+      return res.status(400).json({message: 'Username, email, and password are required'});
+    }
+    
+    const user = await User.create({username, email, password});
+    res.status(201).json({message: 'User created', user});
+  } catch (err) {
+    res.status(400).json({message: 'Error creating user', error: err.message});
+  }
 });
 router.post('/signin', async(req, res) => {
   const {email, password} = req.body;
+  
+  // Check for required fields
+  if (!email || !password) {
+    return res.status(400).json({message: 'Email and password are required'});
+  }
+  
   try {
     const token = await User.matchPasswordAndGenerateToken(email, password);
     res.cookie('token', token, { httpOnly: true });

@@ -2,11 +2,7 @@ const {Router} = require('express');
 const User = require('../models/user');
 const authMiddleware = require('../middleWares/auth');
 const router = Router();
-router.use(authMiddleware("token"));
-router.get('/me', (req, res) => {
-  if (!req.user) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
+router.get('/me', authMiddleware("token"), (req, res) => {
   res.json(req.user);
 });
 router.post('/signup', async(req, res) => {
@@ -24,7 +20,7 @@ router.post('/signin', async(req, res) => {
     res.status(401).json({message: 'Invalid email or password'});
   }
 });
-router.post('/logout', (req, res) => {
+router.post('/logout', authMiddleware("token"), (req, res) => {
   res.clearCookie('token');
   res.status(200).json({ message: 'Logout successful' });
 });

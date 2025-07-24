@@ -7,7 +7,7 @@ function useUser() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axiosApi.get('/user/me');
+        const res = await axiosApi.get('/user/me', { skipAuthInterceptor: true });
         if (res.status === 200) {
           setUser(res.data);
         } else {

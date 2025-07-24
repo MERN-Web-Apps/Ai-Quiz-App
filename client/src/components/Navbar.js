@@ -1,11 +1,10 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import useUser from '../apis/getUser';
 import axiosApi from '../utils/axiosApi';
 
 function Navbar() {
   const { user, loading } = useUser();
-  const navigate = useNavigate();
   const handleLogout = async () => {
     try {
       await axiosApi.post('/user/logout');
@@ -34,7 +33,7 @@ function Navbar() {
           <>
             <span
               style={{ color: 'white', textDecoration: 'none', marginRight: 20, cursor: 'pointer' }}
-              onClick={() => navigate('/profile', { state: { user } })}
+              onClick={() => window.location.href = `/profile/${user.username}`}
             >{user.username}</span>
             <span
               onClick={handleLogout} style={{ color: 'white', textDecoration: 'none', cursor: 'pointer' }}

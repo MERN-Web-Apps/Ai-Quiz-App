@@ -1,4 +1,7 @@
+import { useNavigate } from 'react-router-dom';
+
 function Home() {
+    const navigate = useNavigate();
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 100 }}>
       <h1>Welcome to the Quiz App</h1>
@@ -15,7 +18,7 @@ function Home() {
             cursor: 'pointer',
             transition: 'transform 0.2s',
           }}
-          onClick={() => window.location.href = '/take-quiz'}
+          onClick={() => navigate('/take-quiz')}
           onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
           onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
         >
@@ -33,7 +36,7 @@ function Home() {
             cursor: 'pointer',
             transition: 'transform 0.2s',
           }}
-          onClick={() => window.location.href = '/create-quiz'}
+          onClick={() => navigate('/create-quiz')}
           onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
           onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
         >

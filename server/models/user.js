@@ -3,11 +3,11 @@ const {generateToken} = require('../services/auth');
 const {createHmac, randomBytes} = require('crypto');
 
 const userSchema = new Schema({
-  username: { type: String, required: true },
+  username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   secret: { type: String },
   password: { type: String, required: true },
-  profileImage: { type: String, default: '/imgs/default.jpg' },
+  profileImage: { type: String, default: 'default.jpeg' },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   quizzes: [{
     quiz: { type: Schema.Types.ObjectId, ref: 'Quiz' },
@@ -40,6 +40,13 @@ userSchema.static("matchPasswordAndGenerateToken", async function(email, passwor
     const token = generateToken(user);
     return token;
 });
+
+userSchema.methods.comparePassword = async function(password) {
+    const hashed = createHmac('sha256', this.secret)
+        .update(password)
+        .digest('hex');
+    return hashed === this.password;
+};
 const User = model('User', userSchema);
 
 module.exports = User;

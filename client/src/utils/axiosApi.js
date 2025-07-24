@@ -28,10 +28,6 @@ const configureAxios = () => {
 
 // Run the configuration
 configureAxios();
-
-// Add a response interceptor to handle 401 errors globally
-
-// Helper to show alert outside React tree
 let showGlobalAlert = null;
 export function setGlobalAlert(fn) {
   showGlobalAlert = fn;
@@ -47,6 +43,10 @@ axiosApi.interceptors.response.use(
     ) {
       const currentPath = window.location.pathname + window.location.search;
       if (!window.location.pathname.startsWith('/signin')) {
+        // Parse the current URL for a "from" parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const fromParam = urlParams.get('from') || '/';
+        
         if (showGlobalAlert) {
           showGlobalAlert({
             message: 'You need to sign in to access this page.',
@@ -56,7 +56,8 @@ axiosApi.interceptors.response.use(
             },
             cancelText: 'Cancel',
             onCancel: () => {
-              window.history.back();
+              // Navigate to the "from" parameter if present, or to home page
+              window.location.href = fromParam;
             }
           });
         } else {

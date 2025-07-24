@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import useUser from '../apis/getUser';
 import axiosApi from '../utils/axiosApi';
+import '../styles/Navbar.css';
 
 function Navbar() {
   const { user, loading } = useUser();
@@ -14,36 +15,42 @@ function Navbar() {
     }
   };
 
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    return name.charAt(0).toUpperCase();
+  };
+
   return (
-    <nav style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '10px 30px',
-      background: '#282c34',
-      color: 'white',
-      marginBottom: 30
-    }}>
-      <div style={{ fontWeight: 'bold', fontSize: 22 }}>
-        Quiz App
-      </div>
-      <div>
-        <Link to="/" style={{ color: 'white', textDecoration: 'none', marginRight: 20 }}>Home</Link>
+    <nav className="navbar">
+      <Link to="/" className="navbar-logo">
+        <span className="navbar-logo-icon">🧠</span>
+        <span>Quiz App</span>
+      </Link>
+      <div className="navbar-links">
+        <Link to="/" className="navbar-link">Home</Link>
+        <Link to="/take-quiz" className="navbar-link">Take Quiz</Link>
+        <Link to="/create-quiz" className="navbar-link">Create Quiz</Link>
+        
         {!loading && user ? (
           <>
-            <span
-              style={{ color: 'white', textDecoration: 'none', marginRight: 20, cursor: 'pointer' }}
+            <div 
+              className="user-profile"
               onClick={() => window.location.href = `/profile/${user.username}`}
-            >{user.username}</span>
-            <span
-              onClick={handleLogout} style={{ color: 'white', textDecoration: 'none', cursor: 'pointer' }}
-            >Logout</span>
-
+            >
+              <div className="avatar">{getInitials(user.username)}</div>
+              <span className="username">{user.username}</span>
+            </div>
+            <button 
+              className="navbar-button"
+              onClick={handleLogout}
+            >
+              Logout
+            </button>
           </>
         ) : (
           <>
-            <Link to="/signup" style={{ color: 'white', textDecoration: 'none', marginRight: 20 }}>Signup</Link>
-            <Link to="/signin" style={{ color: 'white', textDecoration: 'none' }}>Sign In</Link>
+            <Link to="/signup" className="navbar-link">Sign Up</Link>
+            <Link to="/signin" className="navbar-button">Sign In</Link>
           </>
         )}
       </div>

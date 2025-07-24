@@ -5,6 +5,7 @@ import Signin from './pages/Signin';
 import Profile from './pages/Profile';
 import Home from './pages/Home';
 import PageNotFound from './pages/404';
+import CreateQuiz from './pages/Create_quiz';
 
 function App() {
 
@@ -17,6 +18,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/profile/:username" element={<Profile />} />
+          <Route path="/create-quiz" element={<CreateQuiz />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </div>

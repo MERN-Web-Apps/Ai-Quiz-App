@@ -1,5 +1,6 @@
 const {Router} = require('express');
 const User = require('../models/user');
+const {generateToken} = require('../services/auth');
 const authMiddleware = require('../middleWares/auth');
 const router = Router();
 const path = require('path');
@@ -49,8 +50,15 @@ router.put('/:username', upload.single('profileImage'), async (req, res) => {
             user.profileImage = req.file.filename;
         }
         await user.save();
-        res.clearCookie('token');
-        res.status(200).json({ message: 'Profile updated successfully' });
+        if(password) {
+            // If password is updated, clear the token cookie
+            res.clearCookie('token');
+            res.status(200).json({ message: 'password updated' });
+        }else{
+            const token = generateToken(user);
+            res.cookie('token', token, { httpOnly: true });
+            res.status(200).json({ message: 'Profile updated successfully' });
+        }
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });

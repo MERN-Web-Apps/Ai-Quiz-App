@@ -7,15 +7,16 @@ router.use(authMiddleware("token"));
 
 router.post('/create', async(req, res) => {
   try {
-    const {title, code, aiprompt, startTime, duration, questions} = req.body;
+    const {title, aiprompt, startTime, duration, isPrivate} = req.body;
+    console.log(req.user);
     const quiz = await Quiz.create({
       title,
-      owner: req.user.username,
-      code,
+      owner: req.user.id,
       aiprompt,
       startTime,
       duration,
-      questions
+      questions: [],
+      isPrivate
     });
     res.status(201).json({message: 'Quiz created successfully', quiz});
   } catch (err) {

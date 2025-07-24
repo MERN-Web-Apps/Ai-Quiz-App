@@ -4,6 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const userRoutes = require('./routes/user');
 const profileRoutes = require('./routes/profile');
+const quizRoutes = require('./routes/quiz');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
@@ -26,7 +27,7 @@ mongoose.connect(MONGODB_URI).then(() => {
 
 app.use("/user", userRoutes);
 app.use("/profile", profileRoutes);
-
+app.use('/quiz', quizRoutes);
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {

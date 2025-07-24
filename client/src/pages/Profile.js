@@ -1,8 +1,10 @@
 import { useParams } from 'react-router-dom';
 import axiosApi from '../utils/axiosApi';
 import { useEffect, useState } from 'react';
+import { getConfig } from '../configLoader';
 
 function Profile() {
+  
   const { username } = useParams();
   const [data, setData] = useState(null);
   const [editing, setEditing] = useState(false);
@@ -10,7 +12,7 @@ function Profile() {
   const [previewImg, setPreviewImg] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-
+  const baseUrl = getConfig().baseUrl;
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -25,17 +27,17 @@ function Profile() {
           confirmPassword: '',
           profileImage: null
         });
-        setPreviewImg(`http://localhost:8000/imgs/${data.user.profileImage}`);
+        setPreviewImg(baseUrl+`/imgs/${data.user.profileImage}`);
       } catch (err) {}
     };
     fetchProfile();
-  }, [username]);
+  }, [username, baseUrl]);
 
   if (!data) {
     return <div>Loading profile...</div>;
   }
   const editable = data.edit;
-  const imgUrl = `http://localhost:8000/imgs/${data.user.profileImage}`;
+  const imgUrl = baseUrl+`/imgs/${data.user.profileImage}`;
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });

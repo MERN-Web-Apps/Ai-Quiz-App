@@ -1,15 +1,35 @@
 import axios from 'axios';
-const axiosApi = axios.create({
-    baseURL: 'http://localhost:4000',
-    withCredentials: true,
-    headers: {
-        'Content-Type': 'application/json',
-    },
-});
+import { getConfig, isConfigLoaded, loadConfig } from '../configLoader';
 
+// Create a custom axios instance that resolves the baseURL dynamically
+const axiosApi = axios.create();
+
+// Function to configure axios with the loaded config
+const configureAxios = () => {
+  try {
+    if (isConfigLoaded()) {
+      const config = getConfig();
+      axiosApi.defaults.baseURL = config.baseUrl;
+      axiosApi.defaults.withCredentials = true;
+      axiosApi.defaults.headers['Content-Type'] = 'application/json';
+    } else {
+      // Wait for config to load then configure
+      loadConfig().then(() => {
+        const config = getConfig();
+        axiosApi.defaults.baseURL = config.baseUrl;
+        axiosApi.defaults.withCredentials = true;
+        axiosApi.defaults.headers['Content-Type'] = 'application/json';
+      });
+    }
+  } catch (error) {
+    console.error("Error configuring axios:", error);
+  }
+};
+
+// Run the configuration
+configureAxios();
 
 // Add a response interceptor to handle 401 errors globally
-
 
 // Helper to show alert outside React tree
 let showGlobalAlert = null;

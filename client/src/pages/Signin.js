@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axiosApi from '../utils/axiosApi';
 import useUser from '../apis/getUser';
+import GoogleButton from 'react-google-button'
 
 function Signin() {
   const { user, loading } = useUser();
@@ -37,9 +38,15 @@ function Signin() {
     }
   };
 
+  const handleGoogleSignin = () => {
+    // Redirect to your backend Google OAuth endpoint
+    window.location.href = `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/auth/google`;
+  };
+
   return (
     <div>
-      <h2>Sign In Page</h2>
+      <h2>SignIn Page</h2>
+      <h4>Don't have an Account? <span style={{cursor: 'pointer', color: 'blue', textDecoration: 'underline'}} onClick={() => (window.location.href = '/signup')}>Sign Up</span></h4>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', maxWidth: 300 }}>
         <input
           type="email"
@@ -57,8 +64,14 @@ function Signin() {
           onChange={handleChange}
           required
         />
-        <button type="submit">Sign In</button>
+        <button type="submit" style={{cursor: 'pointer' }}>Sign In</button>
       </form>
+      
+      <div style={{ maxWidth: 300, margin: '20px 0' }}>
+        <p style={{ textAlign: 'center', margin: '10px 0' }}>OR</p>
+        <GoogleButton onClick={handleGoogleSignin} />
+      </div>
+      
       {message && <p>{message}</p>}
     </div>
   );

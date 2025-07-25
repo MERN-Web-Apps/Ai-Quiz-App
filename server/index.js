@@ -9,6 +9,12 @@ const mongoose = require('mongoose');
 const { handleGoogleCallback } = require('./middleWares/googleAuth');
 require('dotenv').config();
 
+// Validate required environment variables
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+  console.error('Error: Missing required Google OAuth environment variables');
+  console.error('Please ensure GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are set in your .env file');
+  process.exit(1);
+}
 
 const app = express();
 app.use(express.json());
@@ -23,9 +29,37 @@ passport.use(new GoogleStrategy({
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   callbackURL: "/auth/google/callback"
 }, async (accessToken, refreshToken, profile, done) => {
-  // Here you would save user to database
-  // For now, just return the profile
-  return done(null, profile);
+  try {
+    const User = require('./models/user');
+    const crypto = require('crypto');
+    
+    // Extract user data from Google profile
+    const googleEmail = profile.emails[0].value;
+    const googleName = profile.displayName;
+    
+    // Check if user already exists by email
+    let user = await User.findOne({ email: googleEmail });
+    
+    if (user) {
+      // User exists - login
+      return done(null, user);
+    } else {
+      // User doesn't exist - create new account
+      const randomSuffix = crypto.randomBytes(4).toString('hex');
+      const username = googleName.replace(/\s+/g, '').toLowerCase() + '_' + randomSuffix;
+      const randomPassword = crypto.randomBytes(32).toString('hex'); 
+      
+      user = await User.create({
+        username: username,
+        email: googleEmail,
+        password: randomPassword
+      });
+      return done(null, user);
+    }
+  } catch (error) {
+    console.error('Google OAuth error:', error);
+    return done(error, null);
+  }
 }));
 
 app.get ('/', (req, res) => {

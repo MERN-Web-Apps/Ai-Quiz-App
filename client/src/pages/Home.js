@@ -1,4 +1,7 @@
+// import { useNavigate } from 'react-router-dom';
+
 function Home() {
+    // const navigate = useNavigate();
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 100 }}>
       <h1>Welcome to the Quiz App</h1>

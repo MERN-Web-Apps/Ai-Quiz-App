@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const userRoutes = require('./routes/user');
+const profileRoutes = require('./routes/profile');
 const mongoose = require('mongoose');
 const { handleGoogleCallback } = require('./middleWares/googleAuth');
 require('dotenv').config();
@@ -62,6 +63,7 @@ passport.use(new GoogleStrategy({
   }
 }));
 
+app.use('/imgs', express.static(path.join(__dirname, 'public', 'imgs')));
 app.get ('/', (req, res) => {
   res.send('Welcome to the Quiz App!');
 });
@@ -87,6 +89,8 @@ app.get('/auth/google/callback',
 );
 
 app.use("/user", userRoutes);
+app.use("/profile", profileRoutes);
+
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {

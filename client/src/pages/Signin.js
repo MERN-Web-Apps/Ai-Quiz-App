@@ -2,14 +2,27 @@ import React, { useState } from 'react';
 import axiosApi from '../utils/axiosApi';
 import useUser from '../apis/getUser';
 import GoogleButton from 'react-google-button'
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function Signin() {
   const { user, loading } = useUser();
   const [form, setForm] = useState({ email: '', password: '' });
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
 
+  // Get 'from' from location.state or from query param
+  let from = location.state?.from || '/';
+  if (location.search) {
+    const params = new URLSearchParams(location.search);
+    if (params.get('from')) {
+      from = params.get('from');
+    }
+  }
+
+  // If already signed in, redirect to previous page or home
   if (user && !loading) {
-    window.location.href = '/';
+    window.location.href = from;
   }
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -19,13 +32,11 @@ function Signin() {
     e.preventDefault();
     setMessage('');
     try {
-      const res = await axiosApi.post('/user/signin', form);
+      const res = await axiosApi.post('/user/signin', form, { skipAuthInterceptor: true });
       const data = await res.data;
       if (res.status === 201) {
         setMessage('Signin successful!');
-        setForm({ email: '', password: '' });
-        // Optionally redirect to home or login page
-        window.location.href = '/';
+        window.location.href = from;
       } else {
         setMessage(data.message || 'Signin failed.');
       }
@@ -45,9 +56,9 @@ function Signin() {
 
   return (
     <div>
-      <h2>SignIn Page</h2>
-      <h4>Don't have an Account? <span style={{cursor: 'pointer', color: 'blue', textDecoration: 'underline'}} onClick={() => (window.location.href = '/signup')}>Sign Up</span></h4>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', maxWidth: 300 }}>
+      <h1>SignIn Page</h1>
+      <h3>Don't have an Account? <span style={{cursor: 'pointer', color: 'blue', textDecoration: 'underline'}} onClick={() => (navigate('/signup'))}>Sign Up</span></h3>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', maxWidth: 300, }}>
         <input
           type="email"
           name="email"

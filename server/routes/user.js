@@ -14,9 +14,47 @@ router.post('/signup', async(req, res) => {
       return res.status(400).json({message: 'Username, email, and password are required'});
     }
     
-    const user = await User.create({username, email, password});
-    res.status(201).json({message: 'User created', user});
+    // Check if user already exists by email or username
+    const existingUser = await User.findOne({ 
+      $or: [
+        { email: email.toLowerCase() },
+        { username: username }
+      ]
+    });
+    
+    if (existingUser) {
+      if (existingUser.email.toLowerCase() === email.toLowerCase()) {
+        return res.status(400).json({ message: 'Email already registered' });
+      }
+      if (existingUser.username === username) {
+        return res.status(400).json({ message: 'Username already taken' });
+      }
+    }
+    
+    // Create new user
+    const user = await User.create({
+      username, 
+      email: email.toLowerCase(), 
+      password
+    });
+    
+    res.status(201).json({message: 'User created successfully', user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role
+    }});
   } catch (err) {
+    console.error('Signup error:', err);
+    
+    // Handle MongoDB duplicate key errors
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyPattern)[0];
+      return res.status(400).json({ 
+        message: `${field.charAt(0).toUpperCase() + field.slice(1)} already exists` 
+      });
+    }
+    
     res.status(400).json({message: 'Error creating user', error: err.message});
   }
 });

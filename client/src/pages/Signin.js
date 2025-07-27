@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axiosApi from '../utils/axiosApi';
 import useUser from '../apis/getUser';
+import GoogleButton from 'react-google-button'
 import { useNavigate, useLocation } from 'react-router-dom';
 
 function Signin() {
@@ -48,6 +49,11 @@ function Signin() {
     }
   };
 
+  const handleGoogleSignin = () => {
+    // Redirect to your backend Google OAuth endpoint
+    window.location.href = `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/auth/google`;
+  };
+
   return (
     <div>
       <h1>SignIn Page</h1>
@@ -71,6 +77,12 @@ function Signin() {
         />
         <button type="submit" style={{cursor: 'pointer' }}>Sign In</button>
       </form>
+      
+      <div style={{ maxWidth: 300, margin: '20px 0' }}>
+        <p style={{ textAlign: 'center', margin: '10px 0' }}>OR</p>
+        <GoogleButton onClick={handleGoogleSignin} />
+      </div>
+      
       {message && <p>{message}</p>}
     </div>
   );

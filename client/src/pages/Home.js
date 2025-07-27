@@ -1,8 +1,8 @@
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import '../styles/Home.css';
 
 function Home() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   
   return (
     <div className="home-container">
@@ -15,15 +15,39 @@ function Home() {
       
       <div className="home-buttons">
         <button
-          className="home-button take-quiz-btn"
-          onClick={() => navigate('/take-quiz')}
+          style={{
+            padding: '20px 60px',
+            fontSize: '24px',
+            background: 'linear-gradient(90deg, #4e54c8, #8f94fb)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '8px',
+            boxShadow: '0 4px 16px rgba(78,84,200,0.2)',
+            cursor: 'pointer',
+            transition: 'transform 0.2s',
+          }}
+          onClick={() => window.location.href = '/take-quiz'}
+          onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
+          onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
         >
           <span className="button-icon">📝</span>
           Take Quiz
         </button>
         <button
-          className="home-button create-quiz-btn"
-          onClick={() => navigate('/create-quiz')}
+          style={{
+            padding: '20px 60px',
+            fontSize: '24px',
+            background: 'linear-gradient(90deg, #ff512f, #dd2476)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '8px',
+            boxShadow: '0 4px 16px rgba(221,36,118,0.2)',
+            cursor: 'pointer',
+            transition: 'transform 0.2s',
+          }}
+          onClick={() => window.location.href = '/create-quiz'}
+          onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
+          onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
         >
           <span className="button-icon">✨</span>
           Create Quiz

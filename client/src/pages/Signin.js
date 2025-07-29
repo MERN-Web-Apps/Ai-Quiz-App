@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axiosApi from '../utils/axiosApi';
 import useUser from '../apis/getUser';
 import GoogleButton from 'react-google-button'
 import { useNavigate, useLocation } from 'react-router-dom';
+import '../styles/Auth.css'; // We'll create this file for styling
 
 function Signin() {
   const { user, loading } = useUser();
   const [form, setForm] = useState({ email: '', password: '' });
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState(''); // 'success' or 'error'
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -24,6 +27,17 @@ function Signin() {
   if (user && !loading) {
     window.location.href = from;
   }
+  
+  // Animation effect for form elements
+  useEffect(() => {
+    const formElements = document.querySelectorAll('.auth-form-control, .auth-button, .auth-divider, .auth-google-button');
+    formElements.forEach((element, index) => {
+      setTimeout(() => {
+        element.classList.add('appear');
+      }, 100 * index);
+    });
+  }, []);
+  
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -31,21 +45,29 @@ function Signin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
+    setIsSubmitting(true);
     try {
       const res = await axiosApi.post('/user/signin', form, { skipAuthInterceptor: true });
       const data = await res.data;
       if (res.status === 201) {
-        setMessage('Signin successful!');
-        window.location.href = from;
+        setMessageType('success');
+        setMessage('Signin successful! Redirecting...');
+        setTimeout(() => {
+          window.location.href = from;
+        }, 1000);
       } else {
+        setMessageType('error');
         setMessage(data.message || 'Signin failed.');
       }
     } catch (err) {
+      setMessageType('error');
       if (err.response && err.response.data && err.response.data.message) {
         setMessage(err.response.data.message);
       } else {
         setMessage(err.message || 'Server error.');
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -55,35 +77,100 @@ function Signin() {
   };
 
   return (
-    <div>
-      <h1>SignIn Page</h1>
-      <h3>Don't have an Account? <span style={{cursor: 'pointer', color: 'blue', textDecoration: 'underline'}} onClick={() => (navigate('/signup'))}>Sign Up</span></h3>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', maxWidth: 300, }}>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          required
-        />
-        <button type="submit" style={{cursor: 'pointer' }}>Sign In</button>
-      </form>
-      
-      <div style={{ maxWidth: 300, margin: '20px 0' }}>
-        <p style={{ textAlign: 'center', margin: '10px 0' }}>OR</p>
-        <GoogleButton onClick={handleGoogleSignin} />
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <h1>Welcome Back</h1>
+          <p className="auth-subtitle">Sign in to continue to your account</p>
+        </div>
+        
+        {message && (
+          <div className={`auth-message ${messageType}`}>
+            {message}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="auth-form-group">
+            <div className="auth-form-control">
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                required
+                placeholder="Email"
+                autoComplete="email"
+              />
+              <label htmlFor="email">Email</label>
+              <div className="auth-input-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+              </div>
+            </div>
+            
+            <div className="auth-form-control">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                required
+                placeholder="Password"
+                autoComplete="current-password"
+              />
+              <label htmlFor="password">Password</label>
+              <div className="auth-input-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          {/* Move button outside form group and remove the animations */}
+          <button 
+            type="submit" 
+            className="auth-button auth-button-primary"
+            disabled={isSubmitting}
+            style={{marginTop: "20px"}}
+          >
+            {isSubmitting ? (
+              <>
+                <span className="spinner"></span>
+                <span>Signing in...</span>
+              </>
+            ) : 'Sign In'}
+          </button>
+        </form>
+        
+        <div className="auth-divider">
+          <span>OR</span>
+        </div>
+        
+        <div className="auth-google-button">
+          <GoogleButton 
+            onClick={handleGoogleSignin}
+            style={{width: '100%'}}
+          />
+        </div>
+        
+        <div className="auth-footer">
+          <p>Don't have an account? <button onClick={() => navigate('/signup')} className="auth-text-button">Sign Up</button></p>
+        </div>
       </div>
       
-      {message && <p>{message}</p>}
+      <div className="auth-background">
+        <div className="auth-shape auth-shape-1"></div>
+        <div className="auth-shape auth-shape-2"></div>
+        <div className="auth-shape auth-shape-3"></div>
+        <div className="auth-shape auth-shape-4"></div>
+      </div>
     </div>
   );
 }

@@ -52,6 +52,9 @@ router.get('/:code/load', async (req, res) => {
     if (quiz.owner.toString() !== req.user.id) {
       return res.status(403).json({ message: 'You do not have permission to access this quiz' });
     }
+    if (quiz.startTime < new Date()) {
+      return res.status(400).json({ message: 'Quiz has already started' });
+    }
     res.status(200).json(quiz);
   } catch (err) {
     res.status(400).json({ message: 'Error fetching quiz', error: err.message });

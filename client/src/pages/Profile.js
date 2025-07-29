@@ -1,8 +1,9 @@
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import axiosApi from '../utils/axiosApi';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { getConfig } from '../configLoader';
 import '../styles/Profile.css';
+import Chart from 'chart.js/auto';
 
 function Profile() {
   
@@ -13,13 +14,28 @@ function Profile() {
   const [previewImg, setPreviewImg] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [quizHistory, setQuizHistory] = useState([]);
+  const [activeTab, setActiveTab] = useState('stats');
+  const scoreChartRef = useRef(null);
+  const progressChartRef = useRef(null);
   const baseUrl = getConfig().baseUrl;
+  
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const res = await axiosApi.get(`profile/${username}`);
         const data = await res.data;
+        console.log("Profile data:", data); // Debug log to check data structure
         setData(data);
+        
+        // Check for quiz data in the correct structure
+        if (data && data.user && data.user.quizzes && data.user.quizzes.length > 0) {
+          console.log("Quiz history found:", data.user.quizzes);
+          setQuizHistory(data.user.quizzes);
+        } else {
+          console.log("No quiz history found in data");
+        }
+        
         setForm({
           username: data.user.username,
           email: data.user.email,
@@ -29,10 +45,129 @@ function Profile() {
           profileImage: null
         });
         setPreviewImg(baseUrl+`/imgs/${data.user.profileImage}`);
-      } catch (err) {}
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+      }
     };
     fetchProfile();
   }, [username, baseUrl]);
+
+  // Initialize charts after data is loaded
+  useEffect(() => {
+    // Debug log
+    console.log("Chart effect running, quizHistory:", quizHistory, "activeTab:", activeTab);
+    
+    let scoreChart;
+    let progressChart;
+    
+    if (quizHistory && quizHistory.length > 0 && activeTab === 'progress' && scoreChartRef.current && progressChartRef.current) {
+      console.log("Creating charts with data:", quizHistory);
+      
+      // Destroy existing charts if they exist
+      if (scoreChartRef.current.chart) {
+        scoreChartRef.current.chart.destroy();
+      }
+      
+      if (progressChartRef.current.chart) {
+        progressChartRef.current.chart.destroy();
+      }
+      
+      try {
+        // Create score trend chart
+        const scoreCtx = scoreChartRef.current.getContext('2d');
+        scoreChart = new Chart(scoreCtx, {
+          type: 'line',
+          data: {
+            labels: quizHistory.map((_, index) => `Quiz ${index + 1}`),
+            datasets: [{
+              label: 'Score',
+              data: quizHistory.map(quiz => quiz.score),
+              borderColor: '#4CAF50',
+              backgroundColor: 'rgba(76, 175, 80, 0.2)',
+              tension: 0.1,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Score'
+                }
+              }
+            }
+          }
+        });
+        
+        // Create quiz performance chart - using rank data
+        const progressCtx = progressChartRef.current.getContext('2d');
+        
+        // For the second chart, let's show quiz performance by rank
+        const rankData = {};
+        quizHistory.forEach(quiz => {
+          const rankCategory = quiz.rank <= 3 ? 'Top 3' : 
+                              quiz.rank <= 10 ? 'Top 10' : 'Other';
+          rankData[rankCategory] = (rankData[rankCategory] || 0) + 1;
+        });
+        
+        progressChart = new Chart(progressCtx, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(rankData),
+            datasets: [{
+              data: Object.values(rankData),
+              backgroundColor: [
+                '#4CAF50', // Green for Top 3
+                '#FFCE56', // Yellow for Top 10
+                '#FF6384'  // Red for Other
+              ]
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'bottom'
+              },
+              title: {
+                display: true,
+                text: 'Quiz Performance by Rank'
+              }
+            }
+          }
+        });
+        
+        // Store chart instances for cleanup
+        scoreChartRef.current.chart = scoreChart;
+        progressChartRef.current.chart = progressChart;
+        
+        console.log("Charts created successfully");
+      } catch (error) {
+        console.error("Error creating charts:", error);
+      }
+    }
+    
+    // Cleanup function
+    return () => {
+      if (scoreChart) {
+        try {
+          scoreChart.destroy();
+        } catch (e) {
+          console.error("Error destroying score chart:", e);
+        }
+      }
+      if (progressChart) {
+        try {
+          progressChart.destroy();
+        } catch (e) {
+          console.error("Error destroying progress chart:", e);
+        }
+      }
+    };
+  }, [data, quizHistory, activeTab]);
 
   if (!data) {
     return <div>Loading profile...</div>;
@@ -242,19 +377,129 @@ function Profile() {
               </div>
             </div>
             
-            {data.stats && (
+            {!editing && (
+              <div className="profile-tabs">
+                <button 
+                  className={`tab-button ${activeTab === 'stats' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('stats')}
+                >
+                  Statistics
+                </button>
+                <button 
+                  className={`tab-button ${activeTab === 'progress' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('progress')}
+                >
+                  Progress
+                </button>
+                <button 
+                  className={`tab-button ${activeTab === 'quizzes' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('quizzes')}
+                >
+                  Quizzes
+                </button>
+              </div>
+            )}
+            
+            {activeTab === 'stats' && (
               <div className="profile-stats">
                 <div className="stat-box">
-                  <div className="stat-count">{data.stats.quizzes || 0}</div>
-                  <div className="stat-label">Quizzes Created</div>
-                </div>
-                <div className="stat-box">
-                  <div className="stat-count">{data.stats.attempts || 0}</div>
+                  <div className="stat-count">{data.user.quizzes ? data.user.quizzes.length : 0}</div>
                   <div className="stat-label">Quiz Attempts</div>
                 </div>
                 <div className="stat-box">
-                  <div className="stat-count">{data.stats.score || 0}</div>
-                  <div className="stat-label">Total Score</div>
+                  <div className="stat-count">
+                    {data.user.quizzes && data.user.quizzes.length > 0 
+                      ? Math.round(data.user.quizzes.reduce((acc, quiz) => acc + quiz.score, 0) / data.user.quizzes.length) 
+                      : 0}
+                  </div>
+                  <div className="stat-label">Average Score</div>
+                </div>
+                <div className="stat-box">
+                  <div className="stat-count">
+                    {data.user.quizzes && data.user.quizzes.length > 0 
+                      ? data.user.quizzes.filter(quiz => quiz.rank <= 3).length 
+                      : 0}
+                  </div>
+                  <div className="stat-label">Top 3 Finishes</div>
+                </div>
+              </div>
+            )}
+            
+            {activeTab === 'progress' && (
+              <div className="charts-container">
+                <div className="chart-wrapper">
+                  <h3>Score Progress</h3>
+                  <div className="canvas-container">
+                    {quizHistory && quizHistory.length > 0 ? (
+                      <canvas ref={scoreChartRef}></canvas>
+                    ) : (
+                      <div className="no-data-message">
+                        No quiz data available to show score progress.
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="chart-wrapper">
+                  <h3>Performance Distribution</h3>
+                  <div className="canvas-container">
+                    {quizHistory && quizHistory.length > 0 ? (
+                      <canvas ref={progressChartRef}></canvas>
+                    ) : (
+                      <div className="no-data-message">
+                        No quiz data available to show performance distribution.
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {quizHistory && quizHistory.length > 0 && (
+                  <div className="time-performance-stats">
+                    <h3>Time Performance</h3>
+                    <div className="time-stats-grid">
+                      <div className="time-stat-box">
+                        <span className="time-stat-value">
+                          {Math.round(quizHistory.reduce((acc, quiz) => acc + quiz.timeTaken, 0) / quizHistory.length)}s
+                        </span>
+                        <span className="time-stat-label">Average Time</span>
+                      </div>
+                      <div className="time-stat-box">
+                        <span className="time-stat-value">
+                          {Math.min(...quizHistory.map(quiz => quiz.timeTaken))}s
+                        </span>
+                        <span className="time-stat-label">Fastest Time</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {activeTab === 'quizzes' && (
+              <div className="quizzes-list">
+                <h3>Quiz History</h3>
+                {quizHistory && quizHistory.length > 0 ? (
+                  <div className="quiz-grid">
+                    {quizHistory.map((quiz) => (
+                      <Link to={`/quiz/${quiz.quizId}`} className="quiz-card" key={quiz._id || quiz.quizId}>
+                        <div className="quiz-title">
+                          Quiz {quiz.quizId ? `#${quiz.quizId.substring(quiz.quizId.length - 6)}` : ''}
+                        </div>
+                        <div className="quiz-meta">
+                          <span className="quiz-rank">Rank: {quiz.rank}</span>
+                          <span className="quiz-score">Score: {quiz.score}</span>
+                        </div>
+                        <div className="quiz-time">Time taken: {quiz.timeTaken}s</div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="no-data-message">
+                    No quizzes found. Start taking some quizzes to see your history!
+                  </div>
+                )}
+                
+                <div className="browse-quizzes-button">
+                  <Link to="/explore" className="btn btn-primary">Find Quizzes</Link>
                 </div>
               </div>
             )}

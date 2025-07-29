@@ -123,6 +123,7 @@ function Profile() {
                 src={previewImg}
                 alt="Profile"
                 className="profile-image"
+                onError={e => { e.target.onerror = null; e.target.src = baseUrl + '/imgs/default.jpeg'; }}
               />
               <div className="image-upload">
                 <label className="image-upload-label" htmlFor="profile-image-upload">
@@ -219,12 +220,13 @@ function Profile() {
             </div>
           </>
         ) : (
-          <div className="view-profile">
-            <div className="profile-image-container">
+          <>
+            <div className="view-profile">
               <img
                 src={imgUrl}
                 alt="Profile"
                 className="profile-image"
+                onError={e => { e.target.onerror = null; e.target.src = baseUrl + '/imgs/default.jpeg'; }}
               />
             </div>
             
@@ -256,7 +258,7 @@ function Profile() {
                 </div>
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>

@@ -5,57 +5,29 @@ const router = Router();
 
 router.use(authMiddleware("token"));
 
-router.post('/submit', async(req, res) => {
+router.get('/:quizCode', async (req, res) => {
   try {
-    const {quizId, score, timetaken} = req.body;
-    
-    let leaderboard = await Leaderboard.findOne({quiz: quizId});
+    const leaderboard = await Leaderboard.findOne({ quizCode: req.params.quizCode }).populate('rankings.userId', 'username');
     
     if (!leaderboard) {
-      leaderboard = await Leaderboard.create({
-        quiz: quizId,
-        rankings: [{
-          user: req.user.username,
-          score,
-          timetaken
-        }]
-      });
-    } else {
-      leaderboard.rankings.push({
-        user: req.user.username,
-        score,
-        timetaken
-      });
-      await leaderboard.save();
+      return res.status(404).json({ message: 'Leaderboard not found' });
     }
-    
-    res.status(201).json({message: 'Score submitted successfully', leaderboard});
+    res.status(200).json(leaderboard);
   } catch (err) {
-    res.status(400).json({message: 'Error submitting score', error: err.message});
+    res.status(400).json({ message: 'Error fetching leaderboard', error: err.message });
   }
 });
-
-router.get('/quiz/:quizId', async(req, res) => {
+router.post('/:code', async (req, res) => {
   try {
-    const leaderboard = await Leaderboard.findOne({quiz: req.params.quizId})
-      .populate('quiz', 'title');
-    
-    if (!leaderboard) {
-      return res.status(404).json({message: 'Leaderboard not found'});
-    }
-    
-    // Sort rankings by score (descending) and time taken (ascending)
-    leaderboard.rankings.sort((a, b) => {
-      if (b.score === a.score) {
-        return a.timetaken - b.timetaken;
-      }
-      return b.score - a.score;
-    });
-    
-    res.json(leaderboard);
+    const { userId, score, timetaken } = req.body;
+    const leaderboard = await Leaderboard.findOneAndUpdate(
+      { quiz: req.params.code },
+      { $push: { rankings: { userId, score, timetaken } } },
+      { new: true, upsert: true }
+    );
+    res.status(201).json({ message: 'Leaderboard updated successfully', leaderboard });
   } catch (err) {
-    res.status(400).json({message: 'Error fetching leaderboard', error: err.message});
+    res.status(400).json({ message: 'Error updating leaderboard', error: err.message });
   }
 });
-
 module.exports = router;

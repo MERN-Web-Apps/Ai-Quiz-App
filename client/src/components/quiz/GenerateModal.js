@@ -43,9 +43,7 @@ const GenerateModal = ({
             <input
               type="number"
               value={numQuestions}
-              onChange={(e) => setNumQuestions(parseInt(e.target.value) || 1)}
-              min="1"
-              max="20"
+              onChange={(e) => setNumQuestions(parseInt(e.target.value))}
             />
           </div>
         </div>

@@ -10,9 +10,10 @@ const userSchema = new Schema({
   profileImage: { type: String, default: 'default.jpeg' },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   quizzes: [{
-    quiz: { type: Schema.Types.ObjectId, ref: 'Quiz' },
+    quizId: { type: Schema.Types.ObjectId, ref: 'Quiz' },
     rank: { type: Number },
-    date: { type: Date, default: Date.now }
+    score: { type: Number },
+    timeTaken: { type: Number } // time in seconds
   }]
 }, { timestamps: true });
 

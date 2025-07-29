@@ -3,18 +3,18 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 function Quiz(){
     const [quiz, setQuiz] = useState(null);
-    const { quizId } = useParams();
+    const { quizCode } = useParams();
     useEffect(() => {
         const fetchQuiz = async () => {
             try {
-                const response = await axiosApi.get(`quiz/${quizId}`);
+                const response = await axiosApi.get(`quiz/${quizCode}`);
                 setQuiz(response.data);
             } catch (error) {
                 console.error("Error fetching quiz:", error);
             }
         };
         fetchQuiz();
-    }, [quizId]);
+    }, [quizCode]);
     JSON.stringify(quiz, null, 2);
     return (
         <div>

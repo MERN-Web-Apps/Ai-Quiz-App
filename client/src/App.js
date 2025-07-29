@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import PageNotFound from './pages/404';
 import CreateQuiz from './pages/Create_quiz';
 import Quiz from './pages/Quiz';
+import Leaderboard from './pages/leaderboard';
 
 function App() {
 
@@ -20,7 +21,8 @@ function App() {
           <Route path="/signin" element={<Signin />} />
           <Route path="/profile/:username" element={<Profile />} />
           <Route path="/create-quiz" element={<CreateQuiz />} />
-          <Route path="/quiz/:quizId" element={<Quiz />} />
+          <Route path="/quiz/:quizCode" element={<Quiz />} />
+          <Route path="/quiz/:quizCode/leaderboard" element={<Leaderboard />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </div>

@@ -1,9 +1,9 @@
 const {model, Schema} = require('mongoose');
 
 const leaderboardSchema = new Schema({
-  quiz: { type: Schema.Types.ObjectId, ref: 'Quiz', required: true },
+  quizCode: { type: String, required: true },
   rankings: [{
-    user: { type: String, required: true },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     score: { type: Number, required: true },
     timetaken: { type: Number, required: true } // time in seconds
   }]

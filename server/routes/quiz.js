@@ -61,13 +61,20 @@ router.get('/:code/load', async (req, res) => {
 router.put('/:code', async (req, res) => {
   try {
     const { title, startTime, duration, questions, isPrivate } = req.body;
-    const quiz = await Quiz.findOneAndUpdate(
-      { code: req.params.code },
-      { title, startTime, duration, questions, isPrivate }
-    );
+    const quiz = await Quiz.findOne({ code: req.params.code });
     if (!quiz) {
       return res.status(404).json({ message: 'Quiz not found' });
     }
+    if(quiz.owner.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'You do not have permission to update this quiz' });
+    }
+    quiz.title = title;
+    quiz.startTime = startTime;
+    quiz.duration = duration;
+    quiz.questions = questions;
+    quiz.isPrivate = isPrivate;
+    await quiz.save();
+    
     res.status(200).json({ message: 'Quiz updated successfully', quiz });
   } catch (err) {
     res.status(400).json({ message: 'Error updating quiz', error: err.message });

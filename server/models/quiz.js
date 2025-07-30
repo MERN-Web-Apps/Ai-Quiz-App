@@ -4,6 +4,7 @@ const {getQuestionsFromPrompt} = require('../services/getQuestions');
 const quizSchema = new Schema({
   title: { type: String, required: true },
   owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  aiprompt: { type: String, required: true },
   isPrivate: { type: Boolean, default: false },
   code: { type: String, unique: true },
   startTime: { type: Date, required: true },

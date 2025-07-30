@@ -6,6 +6,9 @@ import Profile from './pages/Profile';
 import Home from './pages/Home';
 import PageNotFound from './pages/404';
 import CreateQuiz from './pages/Create_quiz';
+import TakeQuiz from './pages/TakeQuiz';
+import QuizInfo from './pages/QuizInfo';
+import QuizTaking from './pages/QuizTaking';
 
 function App() {
 
@@ -19,6 +22,9 @@ function App() {
           <Route path="/signin" element={<Signin />} />
           <Route path="/profile/:username" element={<Profile />} />
           <Route path="/create-quiz" element={<CreateQuiz />} />
+          <Route path="/take-quiz" element={<TakeQuiz />} />
+          <Route path="/quiz/:code" element={<QuizInfo />} />
+          <Route path="/quiz/:code/take" element={<QuizTaking />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </div>

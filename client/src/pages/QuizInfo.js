@@ -13,6 +13,7 @@ function QuizInfo() {
   const [timeUntilStart, setTimeUntilStart] = useState(null);
   const [canStart, setCanStart] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchQuizInfo();
   }, [code]);
@@ -49,7 +50,7 @@ function QuizInfo() {
   const fetchQuizInfo = async () => {
     try {
       setLoading(true);
-      const res = await axiosApi.get(`/quiz/code/${code}`);
+      const res = await axiosApi.get(`/quiz/${code}?mode=info`);
       if (res.status === 200) {
         setQuiz(res.data.quiz);
       }

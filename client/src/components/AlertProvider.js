@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { setGlobalAlert } from '../utils/axiosApi';
+import Alert from './Alert';
 
 const AlertContext = createContext();
 
@@ -12,13 +13,21 @@ export function AlertProvider({ children }) {
 
 
   const showAlert = useCallback((options) => {
+    // Handle both object and string parameters for backward compatibility
+    let alertOptions;
+    if (typeof options === 'string') {
+      alertOptions = { message: options };
+    } else {
+      alertOptions = options || {};
+    }
+    
     setAlert({
       open: true,
-      message: options.message || '',
-      buttonText: options.buttonText || 'OK',
-      onButtonClick: options.onButtonClick || (() => setAlert(a => ({ ...a, open: false }))),
-      cancelText: options.cancelText || 'Cancel',
-      onCancel: options.onCancel || (() => setAlert(a => ({ ...a, open: false })))
+      message: alertOptions.message || 'Something went wrong',
+      buttonText: alertOptions.buttonText || 'OK',
+      onButtonClick: alertOptions.onButtonClick || (() => setAlert(a => ({ ...a, open: false }))),
+      cancelText: alertOptions.cancelText || 'Cancel',
+      onCancel: alertOptions.onCancel || (() => setAlert(a => ({ ...a, open: false })))
     });
   }, []);
 
@@ -34,18 +43,15 @@ export function AlertProvider({ children }) {
   return (
     <AlertContext.Provider value={{ showAlert, closeAlert }}>
       {children}
-      {/* Dynamically import Alert to avoid circular dependency */}
       {alert.open && (
-        <React.Suspense fallback={null}>
-          {React.createElement(require('./Alert').default, {
-            open: alert.open,
-            message: alert.message,
-            buttonText: alert.buttonText,
-            onButtonClick: alert.onButtonClick,
-            cancelText: alert.cancelText,
-            onCancel: alert.onCancel
-          })}
-        </React.Suspense>
+        <Alert
+          open={alert.open}
+          message={alert.message}
+          buttonText={alert.buttonText}
+          onButtonClick={alert.onButtonClick}
+          cancelText={alert.cancelText}
+          onCancel={alert.onCancel}
+        />
       )}
     </AlertContext.Provider>
   );

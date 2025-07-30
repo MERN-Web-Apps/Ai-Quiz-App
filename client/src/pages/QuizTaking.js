@@ -14,12 +14,14 @@ function QuizTaking() {
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(0);
   const [quizStarted, setQuizStarted] = useState(false);
-  const [quizCompleted, setQuizCompleted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchQuiz();
   }, [code]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (quizStarted && timeLeft > 0) {
       const timer = setInterval(() => {
@@ -39,7 +41,7 @@ function QuizTaking() {
   const fetchQuiz = async () => {
     try {
       setLoading(true);
-      const res = await axiosApi.get(`/quiz/${code}`);
+      const res = await axiosApi.get(`/quiz/${code}?mode=take`);
       if (res.status === 200) {
         setQuiz(res.data.quiz);
         setTimeLeft(res.data.quiz.duration * 60); // Convert minutes to seconds
@@ -72,13 +74,35 @@ function QuizTaking() {
   };
 
   const handleSubmitQuiz = async () => {
+    if (submitting) return; // Prevent double submission
+    
     try {
-      // Here you would typically submit the answers to the backend
-      console.log('Submitting answers:', answers);
-      setQuizCompleted(true);
-      // You can add API call to submit answers here
+      setSubmitting(true);
+      
+      // Format answers for submission
+      const formattedAnswers = quiz.questions.map((question, index) => ({
+        questionId: question._id,
+        selectedOption: answers[index] || null
+      }));
+
+      console.log('Submitting answers:', formattedAnswers);
+      
+      // Submit the quiz
+      const response = await axiosApi.post(`/quiz/${code}/submit`, {
+        answers: formattedAnswers
+      });
+
+      // Navigate to results page with submission data
+      navigate(`/quiz/${code}/results`, {
+        state: {
+          ...response.data,
+          userAnswers: formattedAnswers
+        }
+      });
     } catch (err) {
       console.error('Error submitting quiz:', err);
+      setError(err.response?.data?.message || 'Failed to submit quiz');
+      setSubmitting(false);
     }
   };
 
@@ -114,34 +138,6 @@ function QuizTaking() {
           <p>{error}</p>
           <button className="btn btn-primary" onClick={() => navigate(`/quiz/${code}`)}>
             Back to Quiz Info
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (quizCompleted) {
-    return (
-      <div className="quiz-completed">
-        <div className="completion-content">
-          <div className="success-icon">🎉</div>
-          <h2>Quiz Completed!</h2>
-          <p>Thank you for taking the quiz. Your answers have been submitted.</p>
-          <div className="completion-stats">
-            <div className="stat">
-              <span className="stat-number">{Object.keys(answers).length}</span>
-              <span className="stat-label">Questions Answered</span>
-            </div>
-            <div className="stat">
-              <span className="stat-number">{quiz.questions.length}</span>
-              <span className="stat-label">Total Questions</span>
-            </div>
-          </div>
-          <button 
-            className="btn btn-primary" 
-            onClick={() => navigate('/take-quiz')}
-          >
-            Take Another Quiz
           </button>
         </div>
       </div>
@@ -237,8 +233,9 @@ function QuizTaking() {
           <button
             className="btn btn-success"
             onClick={handleSubmitQuiz}
+            disabled={submitting}
           >
-            Submit Quiz
+            {submitting ? 'Submitting...' : 'Submit Quiz'}
           </button>
         ) : (
           <button

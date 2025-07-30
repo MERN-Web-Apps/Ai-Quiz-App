@@ -9,6 +9,7 @@ import CreateQuiz from './pages/Create_quiz';
 import TakeQuiz from './pages/TakeQuiz';
 import QuizInfo from './pages/QuizInfo';
 import QuizTaking from './pages/QuizTaking';
+import QuizResults from './pages/QuizResults';
 
 function App() {
 
@@ -25,6 +26,7 @@ function App() {
           <Route path="/take-quiz" element={<TakeQuiz />} />
           <Route path="/quiz/:code" element={<QuizInfo />} />
           <Route path="/quiz/:code/take" element={<QuizTaking />} />
+          <Route path="/quiz/:code/results" element={<QuizResults />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </div>

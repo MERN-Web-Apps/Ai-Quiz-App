@@ -40,7 +40,7 @@ function TakeQuiz() {
     setError('');
 
     try {
-      const res = await axiosApi.get(`/quiz/code/${quizCode.toUpperCase()}`);
+      const res = await axiosApi.get(`/quiz/${quizCode.toUpperCase()}?mode=info`);
       if (res.status === 200) {
         navigate(`/quiz/${quizCode.toUpperCase()}`);
       }

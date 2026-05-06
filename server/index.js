@@ -7,6 +7,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const userRoutes = require('./routes/user');
 const profileRoutes = require('./routes/profile');
 const quizRoutes = require('./routes/quiz');
+const LeaderboardRoutes = require('./routes/leaderboard');
 const mongoose = require('mongoose');
 const { handleGoogleCallback } = require('./middleWares/googleAuth');
 require('dotenv').config();
@@ -92,6 +93,7 @@ app.get('/auth/google/callback',
 app.use("/user", userRoutes);
 app.use("/profile", profileRoutes);
 app.use('/quiz', quizRoutes);
+app.use("/leaderboard", LeaderboardRoutes);
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {

@@ -1,5 +1,4 @@
 const {model, Schema, get} = require('mongoose');
-const {getQuestionsFromPrompt} = require('../services/getQuestions');
 
 const quizSchema = new Schema({
   title: { type: String, required: true },
@@ -11,13 +10,15 @@ const quizSchema = new Schema({
   questions: [{
     question: { type: String, required: true },
     options: [{ type: String, required: true }],
-    answer: { type: String, required: true }
+    answer: { type: String, required: true },
+    explanation: { type: String, required: true }
   }]
 }, { timestamps: true });
 
-quizSchema.pre('save', function(next) {
-  this.code = Math.random().toString(36).substring(2, 8).toUpperCase(); 
-  this.questions = getQuestionsFromPrompt(this.aiprompt);
+quizSchema.pre('save', async function(next) {
+  if(this.isNew){
+    this.code = Math.random().toString(36).substring(2, 8).toUpperCase();
+  }
   next();
 });
 

@@ -15,7 +15,6 @@ A full-stack web application that allows users to create, take, and share AI-gen
 - [API Documentation](#api-documentation)
 - [Features in Detail](#features-in-detail)
 - [Contributing](#contributing)
-- [License](#license)
 
 ## ✨ Features
 
